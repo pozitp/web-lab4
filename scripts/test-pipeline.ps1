@@ -17,3 +17,4 @@ kubectl get pipelinerun web-lab4-pipelinerun
 Write-Host "`n=== TaskRuns ===" -ForegroundColor Cyan
 kubectl get taskruns
 
+

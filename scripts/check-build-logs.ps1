@@ -10,3 +10,4 @@ kubectl describe pod web-lab4-pipelinerun-build-backend-pod | Select-String -Pat
 Write-Host "`n=== Build Frontend Pod Description ===" -ForegroundColor Cyan
 kubectl describe pod web-lab4-pipelinerun-build-frontend-pod | Select-String -Pattern "Status|Reason|Message|Error|Events" -Context 3
 
+
