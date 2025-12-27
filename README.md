@@ -6,18 +6,18 @@
 
 - Backend: Spring Boot 3.2, Spring Data JPA, Spring Security
 - Frontend: Vue.js 3, Vue Router, Vite
-- Database: Oracle (Docker)
+- Database: PostgreSQL (Docker)
 
 ## Быстрый старт с Docker
 
-### 1. Запустить Oracle
+### 1. Запустить PostgreSQL
 
 ```powershell
 cd c:\Users\pozit\IdeaProjects\web_lab4
 docker-compose up -d
 ```
 
-Подождите ~2 минуты пока Oracle запустится.
+Подождите ~10 секунд пока PostgreSQL запустится.
 
 ### 2. Собрать фронтенд
 

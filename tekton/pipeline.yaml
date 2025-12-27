@@ -10,7 +10,7 @@ spec:
   - name: git-revision
     default: main
   - name: image-registry
-    default: registry.example.com
+    default: ghcr.io/pozitp
   - name: image-tag
     default: latest
   workspaces:

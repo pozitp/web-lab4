@@ -82,7 +82,9 @@ export default {
     },
     async checkAuth() {
       try {
-        const res = await fetch("/api/auth/check");
+        const res = await fetch("/api/auth/check", {
+          credentials: 'include'
+        });
         if (res.ok) this.$router.push("/app");
       } catch (err) {
         console.debug("Auth check failed", err);
@@ -108,6 +110,7 @@ export default {
         const res = await fetch("/api/auth/login", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
+          credentials: "include",
           body: JSON.stringify({
             username: this.username,
             password: this.password,
@@ -131,6 +134,7 @@ export default {
         const res = await fetch("/api/auth/register", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
+          credentials: "include",
           body: JSON.stringify({
             username: this.username,
             password: this.password,

@@ -27,7 +27,8 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: web-lab4-frontend:latest
+        image: ghcr.io/pozitp/web-lab4-frontend:latest
+        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 80
         resources:

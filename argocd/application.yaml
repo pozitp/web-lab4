@@ -6,7 +6,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/user/web-lab4.git
+    repoURL: https://github.com/pozitp/web-lab4.git
     targetRevision: main
     path: k8s
   destination:

@@ -33,7 +33,8 @@ spec:
     spec:
       containers:
       - name: backend
-        image: web-lab4-backend:latest
+        image: ghcr.io/pozitp/web-lab4-backend:latest
+        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8080
         env:

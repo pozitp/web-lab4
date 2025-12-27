@@ -12,7 +12,7 @@ spec:
   - name: git-revision
     value: main
   - name: image-registry
-    value: registry.example.com
+    value: ghcr.io/pozitp
   - name: image-tag
     value: latest
   workspaces:
@@ -25,5 +25,6 @@ spec:
           requests:
             storage: 1Gi
   - name: dockerconfig
-    emptyDir: {}
+    secret:
+      secretName: ghcr-secret
 
