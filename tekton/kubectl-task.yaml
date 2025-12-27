@@ -8,10 +8,14 @@ spec:
   - name: manifest_dir
     description: Directory containing Kubernetes manifests
     default: k8s
+  workspaces:
+  - name: source
+    description: Source code workspace
   steps:
   - name: apply-manifests
     image: bitnami/kubectl:latest
     script: |
       #!/bin/sh
+      cd $(workspaces.source.path)
       kubectl apply -f $(params.manifest_dir) -n web-lab4
 
