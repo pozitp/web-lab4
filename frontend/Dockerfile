@@ -4,7 +4,7 @@ COPY package*.json ./
 RUN npm ci
 COPY . .
 RUN chmod +x node_modules/.bin/* || true
-RUN npx vite build
+RUN npx vite build --outDir dist
 
 FROM docker.io/library/nginx:alpine
 COPY --from=build /app/dist /usr/share/nginx/html
