@@ -26,13 +26,26 @@ spec:
     image: quay.io/buildah/stable:latest
     script: |
       #!/bin/sh
+      set -e
+      echo "Build context: $(workspaces.source.path)/$(params.CONTEXT)"
+      echo "Dockerfile: $(params.DOCKERFILE)"
+      echo "Image: $(params.IMAGE)"
+      echo "Extra args: $(params.BUILD_EXTRA_ARGS)"
+      ls -la $(workspaces.source.path)
       cd $(workspaces.source.path)/$(params.CONTEXT)
-      buildah bud $(params.BUILD_EXTRA_ARGS) -f $(params.DOCKERFILE) -t $(params.IMAGE) .
+      ls -la
+      buildah bud --pull-always $(params.BUILD_EXTRA_ARGS) -f $(params.DOCKERFILE) -t $(params.IMAGE) .
     securityContext:
       runAsUser: 0
+      capabilities:
+        add:
+        - SETUID
+        - SETGID
     env:
     - name: STORAGE_DRIVER
       value: vfs
     - name: BUILDAH_ISOLATION
       value: chroot
+    - name: BUILDAH_FORMAT
+      value: docker
 
