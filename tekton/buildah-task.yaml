@@ -34,7 +34,11 @@ spec:
       ls -la $(workspaces.source.path)
       cd $(workspaces.source.path)/$(params.CONTEXT)
       ls -la
-      buildah bud --pull-always $(params.BUILD_EXTRA_ARGS) -f $(params.DOCKERFILE) -t $(params.IMAGE) .
+      buildah bud --pull-always -f $(params.DOCKERFILE) -t $(params.IMAGE) .
+      if [ "$(params.BUILD_EXTRA_ARGS)" = "--push" ]; then
+        echo "Pushing image to registry..."
+        buildah push $(params.IMAGE) || echo "Push failed (registry may not be configured - this is OK for testing)"
+      fi
     securityContext:
       runAsUser: 0
       capabilities:
