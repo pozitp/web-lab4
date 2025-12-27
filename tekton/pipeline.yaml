@@ -1,0 +1,140 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: web-lab4-pipeline
+  namespace: default
+spec:
+  params:
+  - name: git-url
+    default: https://github.com/user/web-lab4.git
+  - name: git-revision
+    default: main
+  - name: image-registry
+    default: registry.example.com
+  - name: image-tag
+    default: latest
+  workspaces:
+  - name: source
+  - name: dockerconfig
+  tasks:
+  - name: clone-repo
+    taskRef:
+      name: git-clone
+      kind: Task
+    workspaces:
+    - name: output
+      workspace: source
+    params:
+    - name: url
+      value: $(params.git-url)
+    - name: revision
+      value: $(params.git-revision)
+
+  - name: build-backend
+    runAfter:
+    - clone-repo
+    taskRef:
+      name: buildah
+      kind: Task
+    workspaces:
+    - name: source
+      workspace: source
+    - name: storage
+      workspace: dockerconfig
+    params:
+    - name: IMAGE
+      value: $(params.image-registry)/web-lab4-backend:$(params.image-tag)
+    - name: DOCKERFILE
+      value: Dockerfile
+    - name: CONTEXT
+      value: .
+
+  - name: build-frontend
+    runAfter:
+    - clone-repo
+    taskRef:
+      name: buildah
+      kind: Task
+    workspaces:
+    - name: source
+      workspace: source
+    - name: storage
+      workspace: dockerconfig
+    params:
+    - name: IMAGE
+      value: $(params.image-registry)/web-lab4-frontend:$(params.image-tag)
+    - name: DOCKERFILE
+      value: frontend/Dockerfile
+    - name: CONTEXT
+      value: frontend
+
+  - name: test-backend
+    runAfter:
+    - clone-repo
+    taskRef:
+      name: gradle
+      kind: Task
+    workspaces:
+    - name: source
+      workspace: source
+    params:
+    - name: ARGS
+      value: "test"
+
+  - name: push-backend
+    runAfter:
+    - build-backend
+    - test-backend
+    taskRef:
+      name: buildah
+      kind: Task
+    workspaces:
+    - name: source
+      workspace: source
+    - name: storage
+      workspace: dockerconfig
+    params:
+    - name: IMAGE
+      value: $(params.image-registry)/web-lab4-backend:$(params.image-tag)
+    - name: DOCKERFILE
+      value: Dockerfile
+    - name: CONTEXT
+      value: .
+    - name: BUILD_EXTRA_ARGS
+      value: --push
+
+  - name: push-frontend
+    runAfter:
+    - build-frontend
+    taskRef:
+      name: buildah
+      kind: Task
+    workspaces:
+    - name: source
+      workspace: source
+    - name: storage
+      workspace: dockerconfig
+    params:
+    - name: IMAGE
+      value: $(params.image-registry)/web-lab4-frontend:$(params.image-tag)
+    - name: DOCKERFILE
+      value: frontend/Dockerfile
+    - name: CONTEXT
+      value: frontend
+    - name: BUILD_EXTRA_ARGS
+      value: --push
+
+  - name: deploy
+    runAfter:
+    - push-backend
+    - push-frontend
+    taskRef:
+      name: kubectl-apply
+      kind: Task
+    workspaces:
+    - name: source
+      workspace: source
+    params:
+    - name: manifest_dir
+      value: k8s
+

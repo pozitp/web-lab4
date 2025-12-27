@@ -1,0 +1,33 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: git-clone
+  namespace: default
+spec:
+  params:
+  - name: url
+    description: Git repository URL
+  - name: revision
+    description: Git revision to checkout
+    default: main
+  workspaces:
+  - name: output
+    description: The workspace where the git repo will be cloned
+  steps:
+  - name: clone
+    image: alpine/git:latest
+    script: |
+      #!/bin/sh
+      set -e
+      echo "Cloning repository: $(params.url)"
+      echo "Branch/Revision: $(params.revision)"
+      echo "Target directory: $(workspaces.output.path)"
+      cd $(workspaces.output.path)
+      git clone --depth 1 -b $(params.revision) $(params.url) . || {
+        echo "Failed to clone with branch, trying without branch specification..."
+        git clone --depth 1 $(params.url) .
+        git checkout $(params.revision) || git checkout -b $(params.revision)
+      }
+      echo "Clone successful!"
+      ls -la
+

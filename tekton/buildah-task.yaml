@@ -1,0 +1,38 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: buildah
+  namespace: default
+spec:
+  params:
+  - name: IMAGE
+    description: Image reference
+  - name: DOCKERFILE
+    description: Path to Dockerfile
+    default: Dockerfile
+  - name: CONTEXT
+    description: Build context
+    default: .
+  - name: BUILD_EXTRA_ARGS
+    description: Extra build arguments
+    default: ""
+  workspaces:
+  - name: source
+    description: Source code workspace
+  - name: storage
+    description: Buildah storage workspace
+  steps:
+  - name: build
+    image: quay.io/buildah/stable:latest
+    script: |
+      #!/bin/sh
+      cd $(workspaces.source.path)/$(params.CONTEXT)
+      buildah bud $(params.BUILD_EXTRA_ARGS) -f $(params.DOCKERFILE) -t $(params.IMAGE) .
+    securityContext:
+      runAsUser: 0
+    env:
+    - name: STORAGE_DRIVER
+      value: vfs
+    - name: BUILDAH_ISOLATION
+      value: chroot
+

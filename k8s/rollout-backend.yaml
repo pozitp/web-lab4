@@ -1,0 +1,108 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: web-lab4-backend
+  namespace: web-lab4
+spec:
+  replicas: 3
+  strategy:
+    canary:
+      steps:
+      - setWeight: 10
+      - pause: {duration: 30s}
+      - setWeight: 25
+      - pause: {duration: 30s}
+      - setWeight: 50
+      - pause: {duration: 30s}
+      - setWeight: 100
+      canaryService: web-lab4-backend-canary
+      stableService: web-lab4-backend
+      trafficRouting:
+        istio:
+          virtualService:
+            name: web-lab4-backend-vs
+            routes:
+            - primary
+  selector:
+    matchLabels:
+      app: web-lab4-backend
+  template:
+    metadata:
+      labels:
+        app: web-lab4-backend
+    spec:
+      containers:
+      - name: backend
+        image: web-lab4-backend:latest
+        ports:
+        - containerPort: 8080
+        env:
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: username
+        - name: DB_PASS
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: password
+        volumeMounts:
+        - name: config
+          mountPath: /app/config
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "200m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+      volumes:
+      - name: config
+        configMap:
+          name: web-lab4-config
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-lab4-backend-canary
+  namespace: web-lab4
+spec:
+  selector:
+    app: web-lab4-backend
+    rollouts-pod-template-hash: canary
+  ports:
+  - port: 8080
+    targetPort: 8080
+
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: web-lab4-backend-vs
+  namespace: web-lab4
+spec:
+  hosts:
+  - web-lab4-backend
+  http:
+  - name: primary
+    match:
+    - headers:
+        x-feature-flag:
+          exact: "variant-b"
+    route:
+    - destination:
+        host: web-lab4-backend-canary
+      weight: 100
+    - destination:
+        host: web-lab4-backend
+      weight: 0
+  - route:
+    - destination:
+        host: web-lab4-backend
+      weight: 90
+    - destination:
+        host: web-lab4-backend-canary
+      weight: 10
+

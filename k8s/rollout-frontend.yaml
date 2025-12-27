@@ -1,0 +1,54 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: web-lab4-frontend
+  namespace: web-lab4
+spec:
+  replicas: 2
+  strategy:
+    canary:
+      steps:
+      - setWeight: 10
+      - pause: {duration: 30s}
+      - setWeight: 25
+      - pause: {duration: 30s}
+      - setWeight: 50
+      - pause: {duration: 30s}
+      - setWeight: 100
+      canaryService: web-lab4-frontend-canary
+      stableService: web-lab4-frontend
+  selector:
+    matchLabels:
+      app: web-lab4-frontend
+  template:
+    metadata:
+      labels:
+        app: web-lab4-frontend
+    spec:
+      containers:
+      - name: frontend
+        image: web-lab4-frontend:latest
+        ports:
+        - containerPort: 80
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "50m"
+          limits:
+            memory: "128Mi"
+            cpu: "100m"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-lab4-frontend-canary
+  namespace: web-lab4
+spec:
+  selector:
+    app: web-lab4-frontend
+    rollouts-pod-template-hash: canary
+  ports:
+  - port: 80
+    targetPort: 80
+

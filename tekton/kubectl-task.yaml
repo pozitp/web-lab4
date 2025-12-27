@@ -1,0 +1,17 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: kubectl-apply
+  namespace: default
+spec:
+  params:
+  - name: manifest_dir
+    description: Directory containing Kubernetes manifests
+    default: k8s
+  steps:
+  - name: apply-manifests
+    image: bitnami/kubectl:latest
+    script: |
+      #!/bin/sh
+      kubectl apply -f $(params.manifest_dir) -n web-lab4
+

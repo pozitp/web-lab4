@@ -1,0 +1,29 @@
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  name: web-lab4-pipelinerun
+  namespace: default
+spec:
+  pipelineRef:
+    name: web-lab4-pipeline
+  params:
+  - name: git-url
+    value: https://github.com/pozitp/web-lab4.git
+  - name: git-revision
+    value: main
+  - name: image-registry
+    value: registry.example.com
+  - name: image-tag
+    value: latest
+  workspaces:
+  - name: source
+    volumeClaimTemplate:
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi
+  - name: dockerconfig
+    emptyDir: {}
+

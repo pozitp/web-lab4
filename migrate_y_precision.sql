@@ -1,0 +1,3 @@
+ALTER TABLE hit_results ALTER COLUMN y TYPE
+DECIMAL
+(38,30);
