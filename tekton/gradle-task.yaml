@@ -9,6 +9,9 @@ spec:
     description: Gradle arguments (space-separated)
     type: string
     default: "build"
+  workspaces:
+  - name: source
+    description: Source code workspace
   steps:
   - name: gradle-run
     image: gradle:8.5-jdk17
